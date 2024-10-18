@@ -1,24 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WGISTL - What's Good in St. Louis? Website
 
 ## Getting Started
 
-First, run the development server:
+1. Environment Setup:
+   - Install necessary dependencies: `npm install nodemailer`.
+   - Install Tailwind CSS: Follow <https://tailwindcss.com/docs/guides/nextjs>.
+   - Set up environment variables for SendGrid credentials in a `.env.local` file:
+     SENDGRID_USER=your-sendgrid-username
+     SENDGRID_PASS=your-sendgrid-password
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. Create a SendGrid Account:
+   - Go to <https://sendgrid.com/> and sign up for an account.
+   - Once registered, create an API key that will be used as your password.
+   - Set the SENDGRID_USER as 'apikey' and SENDGRID_PASS as your generated API key.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Domain Deployment:
+   - Deploy the website on Vercel: `npx vercel` (ensure your domain on Namecheap is pointed to Vercel).
+   - Add the domain in the Vercel project settings to connect it to your Namecheap domain.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. Video File:
+   - Add your background video file in the `public` folder as `video.mp4`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Notes:
+
+- This basic setup allows for easy extensibility by adding future components such as authentication and a login system.
+- Tailwind CSS is used for rapid styling and maintaining a consistent design.
 
 ## Learn More
 
