@@ -8,7 +8,7 @@ import { useUser, SignedIn, SignedOut, SignOutButton,SignInButton, SignUpButton,
 // Header component definition, reused in multiple parts of the application
 export default function Header() {
   return (
-    <header className="bg-white shadow-md p-4 flex justify-between items-center">
+    <header className="bg-white shadow-md p-4 flex justify-between items-center" style={{ maxWidth: '100vw', margin: '0 auto' }}>
       {/* Site logo using the hero color and Oswald font */}
       <Link href="/" legacyBehavior>
       <div className="flex items-start flex-row gap-3">
