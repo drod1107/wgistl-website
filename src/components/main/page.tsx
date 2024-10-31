@@ -1,8 +1,9 @@
-// src/app/components/main/page.tsx
+// components/main/page.tsx
 'use client'
 
 import { SignInButton, SignUpButton, useAuth, useUser } from "@clerk/nextjs";
 import VideoGallery from "../VideoGallery";
+import VideoUpload from "../VideoUpload";
 
 export default function Main() {
   const { isLoaded, userId } = useAuth();
@@ -40,11 +41,12 @@ export default function Main() {
     );
   }
 
-  // Get the organization name and playlist ID from user metadata
+  // Get the organization name and folder IDs from user metadata
   const orgName = user?.unsafeMetadata?.org_name as string;
-  const unlistedId = user?.unsafeMetadata?.unlistedId as string;
+  const unlistedId = user?.unsafeMetadata?.unlistedId as string;  // This is for raw content
+  // const publicId = user?.unsafeMetadata?.publicId as string;      // This is for finished content
 
-  // Show error if no playlist ID is found
+  // Show error if no folder ID is found
   if (!unlistedId) {
     return (
       <div className="flex justify-center items-center h-screen px-4">
@@ -72,14 +74,15 @@ export default function Main() {
     );
   }
 
-  // Show the main content with VideoGallery
+  // Show the main content with VideoGallery and VideoUpload
   return (
     <div className="flex flex-col min-h-screen p-4">
       <h1 className="text-3xl font-bold text-gray-800 font-oswald mb-8 text-center">
         {orgName}&apos;s Content Dashboard
       </h1>
+      <VideoUpload folderId={unlistedId}/>
       <div className="flex-grow">
-        <VideoGallery id={unlistedId} />
+        <VideoGallery folderId={unlistedId} />  {/* Showing raw content playlist */}
       </div>
     </div>
   );
