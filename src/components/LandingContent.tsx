@@ -23,18 +23,37 @@ export default function LandingContent() {
           Amplifying voices, connecting resources, and ending the cycle of inequity in St. Louis&apos; nonprofit space.
         </p>
         <p className="text-xl text-white mt-4 font-montserrat">
-          Join us on our mission to make a positive difference in St. Louis&apos; nonprofit space.
+          Loud voices are drowning out the quiet servants of change. We aim to do something about it.
+        </p>
+        <h2 className="text-4xl text-white mt-4 font-oswald">TLDR: We do for free what others are paying money for so you can do what really matters instead.</h2>
+        
+        <p className="text-xl text-white mt-4 font-montserrat">
+          WGISTL and the What's Good Network are devoted to helping organizations who are making <br/><strong className="text-red-800">real impact</strong><br/> in your city and connecting them with:
+        </p>
+        <ul className="text-xl text-white mt-4 font-montserrat">
+          <li>Donors and Small Donation Networks</li>
+          <li>Volunteers</li>
+          <li>Other Orgs in Adjacent Missions</li>
+          <li>Vetted Suppliers, Vendors, and Service Providers</li>
+        </ul>
+          <p className="text-xl text-white mt-4 font-montserrat">
+          ...to amplify their voices, boost their impact, and help bring our ultimate vision to bear.
+        </p>
+        <h3 className="text-xl text-white mt-4 font-montserrat">What's Good Network believes we have all we need to solve the world's problems - if we just learn to work together.</h3>
+        
+        <p className="text-xl text-white mt-4 font-montserrat">
+          Healthy Competition is for business - not public service. If you believe collaboration and communication are the key to overcoming our challenges, we invite you to join us in our mission to change how America does change.
         </p>
         <p className="text-xl text-white mt-4 font-montserrat">
-          If your org could use FREE social media assets like the one above,<br /> 
-          <strong>click the button below to get started </strong><br />
-          and learn how we can help you to <br />
-          <strong className="text-red-800">amplify your voice</strong><br /> 
+          If your org could use FREE social media assets like the one above, or you want to be a part of the What's Good Movement, <br /> 
+          <br/><strong>click the button below to get learn what that looks like and to get started </strong><br/><br />
+          Let's <br />
+          <br/><strong className="text-red-800">amplify your voice</strong><br/><br /> 
           and <br />
-          <strong className="text-red-800">deepen your impact.</strong>
+          <br/><strong className="text-red-800">deepen your impact.</strong><br/>
         </p>
         <p className="text-xl text-white text-bold mt-4 font-montserrat">
-          <strong>...Without spending a penny.</strong>
+          <br/><strong>...Without spending a penny.</strong><br/>
         </p>
         <SignUpButton>
           <button className="bg-white text-black font-bold py-2 px-4 rounded my-5">

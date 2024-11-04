@@ -80,6 +80,8 @@ export default function Main() {
       <h1 className="text-3xl font-bold text-gray-800 font-oswald mb-8 text-center">
         {orgName}&apos;s Content Dashboard
       </h1>
+      <h2 className="text-2xl font-bold text-gray-800 font-oswald mb-4 text-center">
+        Note: During our beta launch phase,</h2><p className="text-xl text-gray-600 mb-4"> ...there may be delays in the appearance of preview thumbnails.<br/><br/> You may be required to click through in order to view the content. <br/><br/>Also be aware that uploads will continue to process for some time after upload before they can be viewed. <br/><br/>Thank you for your patience as we grow and evolve! </p>
       <VideoUpload folderId={unlistedId}/>
       <div className="flex-grow">
         <VideoGallery folderId={unlistedId} />  {/* Showing raw content playlist */}
