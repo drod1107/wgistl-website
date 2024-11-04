@@ -4,7 +4,7 @@ import { getAuthToken } from "./authUtils";
 import { DRIVE_API_BASE, UPLOAD_API_BASE } from "./constants";
 import { DriveError, DriveErrorType } from "@/types/drive";
 
-export async function uploadVideo(file: Buffer, filename: string, folderId: string): Promise<any> {
+export async function uploadVideo(file: Buffer, filename: string, folderId: string): Promise<unknown> {
   const token = await getAuthToken();
 
   // Step 1: Initialize upload session
