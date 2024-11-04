@@ -28,7 +28,7 @@ export default function LandingContent() {
         <h2 className="text-4xl text-white mt-4 font-oswald">TLDR: We do for free what others are paying money for so you can do what really matters instead.</h2>
         
         <p className="text-xl text-white mt-4 font-montserrat">
-          WGISTL and the What's Good Network are devoted to helping organizations who are making <br/><strong className="text-red-800">real impact</strong><br/> in your city and connecting them with:
+          WGISTL and the What&apos;s Good Network are devoted to helping organizations who are making <br/><strong className="text-red-800">real impact</strong><br/> in your city and connecting them with:
         </p>
         <ul className="text-xl text-white mt-4 font-montserrat">
           <li>Donors and Small Donation Networks</li>
@@ -39,15 +39,15 @@ export default function LandingContent() {
           <p className="text-xl text-white mt-4 font-montserrat">
           ...to amplify their voices, boost their impact, and help bring our ultimate vision to bear.
         </p>
-        <h3 className="text-xl text-white mt-4 font-montserrat">What's Good Network believes we have all we need to solve the world's problems - if we just learn to work together.</h3>
+        <h3 className="text-xl text-white mt-4 font-montserrat">What&apos;s Good Network believes we have all we need to solve the world&apos;s problems - if we just learn to work together.</h3>
         
         <p className="text-xl text-white mt-4 font-montserrat">
           Healthy Competition is for business - not public service. If you believe collaboration and communication are the key to overcoming our challenges, we invite you to join us in our mission to change how America does change.
         </p>
         <p className="text-xl text-white mt-4 font-montserrat">
-          If your org could use FREE social media assets like the one above, or you want to be a part of the What's Good Movement, <br /> 
+          If your org could use FREE social media assets like the one above, or you want to be a part of the What&apos;s Good Movement, <br /> 
           <br/><strong>click the button below to get learn what that looks like and to get started </strong><br/><br />
-          Let's <br />
+          Let&apos;s <br />
           <br/><strong className="text-red-800">amplify your voice</strong><br/><br /> 
           and <br />
           <br/><strong className="text-red-800">deepen your impact.</strong><br/>
