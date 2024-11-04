@@ -1,0 +1,17 @@
+{
+    "name": "What's Good in St. Louis",
+    "short_name": "WGISTL",
+    "description": "Amplifying voices and connecting resources in St. Louis' nonprofit space",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FFFFFF",
+    "theme_color": "#002F87",
+    "orientation": "portrait-primary",
+    "icons": [
+      {
+        "src": "/images/logo.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }
+    ]
+  }

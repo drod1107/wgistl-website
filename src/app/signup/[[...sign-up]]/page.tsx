@@ -3,9 +3,11 @@
 import * as React from 'react'
 import { useSignUp } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import Header from '@/app/components/Header'
-import { ClerkAPIError } from '@clerk/types'
+import Header from '@/components/Header'
 import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
+import { DriveErrorType } from '@/types/drive'
+
+export const dynamic = 'force-dynamic';
 
 interface FormState {
   email: string
@@ -13,6 +15,13 @@ interface FormState {
   orgName: string
   firstName: string
   lastName: string
+}
+
+interface ApiError {
+  code: string
+  message: string
+  longMessage: string
+  meta: Record<string, unknown>
 }
 
 export default function Page() {
@@ -31,7 +40,7 @@ export default function Page() {
   // UI state
   const [verifying, setVerifying] = React.useState(false)
   const [code, setCode] = React.useState('')
-  const [errors, setErrors] = React.useState<ClerkAPIError[]>()
+  const [errors, setErrors] = React.useState<ApiError[]>()
   const [isLoading, setIsLoading] = React.useState(false)
 
   // Handle form input changes
@@ -52,24 +61,35 @@ export default function Page() {
     }
 
     try {
-      // Create playlists via server API route
-      const playlistResponse = await fetch('/api/create-playlists', {
+      // Create folders via server API route
+      const folderResponse = await fetch('/api/createFolders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           orgName: formState.orgName,
+          orgEmail: formState.email,
         }),
-      })
+      });
 
-      if (!playlistResponse.ok) {
-        throw new Error('Failed to create playlists')
+      const data = await folderResponse.json();
+
+      if (!folderResponse.ok) {
+        throw {
+          code: 'folder_creation_failed',
+          message: data.error || 'Failed to create organization folders',
+          longMessage: data.details?.message || 'Unable to create the necessary folders for your organization. Please try again.',
+          meta: {
+            type: data.type || DriveErrorType.FOLDER_ERROR,
+            ...data.details
+          }
+        };
       }
 
-      const { unlistedId, publicId } = await playlistResponse.json()
+      const { unlistedId, publicId } = data;
 
-      // Create the Clerk user with the playlist IDs
+      // Create the Clerk user with the folder IDs
       const signUpAttempt = await signUp.create({
         emailAddress: formState.email,
         password: formState.password,
@@ -83,30 +103,41 @@ export default function Page() {
           orgId: unlistedId,
           userId: publicId
         }
-      })
+      });
 
       if (signUpAttempt.status !== 'complete') {
-        await signUp.prepareEmailAddressVerification({
+        await signUpAttempt.prepareEmailAddressVerification({
           strategy: 'email_code'
-        })
-        setVerifying(true)
+        });
+        setVerifying(true);
       }
-    } catch (err: unknown) {
-      console.error('Signup error:', err)
+
+    } catch (err) {
+      console.error('Signup error:', err);
       if (isClerkAPIResponseError(err)) {
-        setErrors(err.errors)
-      } else if (err instanceof Error) {
+        // Map Clerk errors to our ApiError format
+        setErrors(err.errors.map(clerkError => ({
+          code: clerkError.code,
+          message: clerkError.message,
+          longMessage: clerkError.longMessage || clerkError.message, // Ensure longMessage is always present
+          meta: clerkError.meta || {}
+        })));
+      } else if (err && typeof err === 'object' && 'code' in err) {
+        // Handle our API errors (like folder creation errors)
+        setErrors([err as ApiError]);
+      } else {
+        // Handle unexpected errors
         setErrors([{
-          code: 'signup_error',
-          message: err.message,
-          longMessage: err.message,
+          code: 'unexpected_error',
+          message: err instanceof Error ? err.message : 'An unexpected error occurred',
+          longMessage: err instanceof Error ? err.message : 'An unexpected error occurred during signup. Please try again.',
           meta: {}
-        }])
+        }]);
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Handle the verification code submission
   const handleVerify = async (e: React.FormEvent) => {
@@ -121,7 +152,7 @@ export default function Page() {
     try {
       const signUpAttempt = await signUp.attemptEmailAddressVerification({
         code
-      })
+      });
 
       if (signUpAttempt.status === 'complete') {
         // Send welcome email
@@ -138,14 +169,14 @@ export default function Page() {
           })
         });
 
+        const emailData = await emailResponse.json();
+        
         if (!emailResponse.ok) {
-          const errorData = await emailResponse.json();
-          console.error('Failed to send welcome email:', errorData);
           setErrors([{
             code: 'email_error',
-            message: 'Account created but welcome email failed to send.',
+            message: 'Welcome email failed to send',
             longMessage: 'Your account was created successfully, but we encountered an issue sending the welcome email. You can still proceed to use the platform.',
-            meta: {}
+            meta: emailData
           }]);
         }
 
@@ -153,17 +184,24 @@ export default function Page() {
         await setActive({ session: signUpAttempt.createdSessionId })
         router.push('/')
       }
-    } catch (err: unknown) {
-      console.error('Verification error:', err)
+    } catch (err) {
+      console.error('Verification error:', err);
       if (isClerkAPIResponseError(err)) {
-        setErrors(err.errors)
-      } else if (err instanceof Error) {
+        // Map Clerk errors to our ApiError format
+        setErrors(err.errors.map(clerkError => ({
+          code: clerkError.code,
+          message: clerkError.message,
+          longMessage: clerkError.longMessage || clerkError.message,
+          meta: clerkError.meta || {}
+        })));
+      } else {
+        // Handle unexpected errors
         setErrors([{
           code: 'verification_error',
-          message: err.message,
-          longMessage: err.message,
+          message: err instanceof Error ? err.message : 'Verification failed',
+          longMessage: err instanceof Error ? err.message : 'Failed to verify your email. Please try again.',
           meta: {}
-        }])
+        }]);
       }
     } finally {
       setIsLoading(false)
