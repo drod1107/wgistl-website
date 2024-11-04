@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
 import { DriveErrorType } from '@/types/drive'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic';
 
@@ -254,6 +255,21 @@ export default function Page() {
       <Header />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Sign up</h1>
+        <h2 className="text-lg font-semibold mb-4">Here&apos;s the problem:</h2>
+        <p className="mb-4">Big orgs suck the air out of the room. Some are great. Some are not.</p>
+        <p className="mb-4">Most of them prevent resources from flowing to smaller orgs who all too often are far too busy making an impact to crow about it.</p>
+        <p className="mb-4">We&apos;re here to help.</p>
+        <br/>
+        <h2 className="text-lg font-semibold mb-4">Here&apos;s our solution:</h2>
+        <p className="mb-4">We take your submitted raw video and produce web content that&apos;s polished and ready for sharing across channels to amplify your voice.</p>
+        <p className="mb-4">That&apos;s where we&apos;re starting. And it&apos;s free. Completely.</p>
+        <br/>
+        <p className="mb-4">Over time, we hope to do more. <br/><strong>MUCH more.</strong></p>
+        <p className="mb-4">We plan to build networks to help you collaborate to make broader impacts.<br/><br/> Social funding networks to help you impact deeper.<br/><br/> And sharing networks to help you brag about it all, everywhere that matters.</p>
+        <br/>
+        <h2 className="text-lg font-semibold mb-4">Ready to level up your organization? <br/><br/>Fill out the form to get started. Together, we can do anything. Let&apos;s go do THIS thing, and let&apos;s do it now.</h2>
+        {/* link to email david@windroseandco.com */}
+        <p className="mb-4"><Link href="mailto:david@windroseandco.com">- David Rodriguez, WGISTL</Link></p>
         <form onSubmit={handleSubmit} className="max-w-md mx-auto">
           <div className="mb-4">
             <label className="block mb-2" htmlFor="firstName">
