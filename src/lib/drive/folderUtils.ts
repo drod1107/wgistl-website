@@ -4,7 +4,7 @@ import { getAuthToken } from "./authUtils";
 import { DRIVE_API_BASE } from "./constants";
 import { DriveError, DriveErrorType } from "@/types/drive";
 
-export async function createFolder(name: string): Promise<any> {
+export async function createFolder(name: string): Promise<unknown> {
   const token = await getAuthToken();
   const response = await fetch(`${DRIVE_API_BASE}/files`, {
     method: "POST",
