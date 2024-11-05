@@ -113,7 +113,7 @@ const VideoGallery = ({ folderId }: VideoGalleryProps) => {
             <VideoPlayer
               title={video.name}
               description={video.description || ''}
-              videoUrl={video.webViewLink}
+              // videoUrl={video.webViewLink}
               thumbnail={video.thumbnailLink}
               createdAt={video.createdTime}
               videoId={video.id}

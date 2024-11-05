@@ -10,7 +10,7 @@ import Image from 'next/image';
 interface VideoPlayerProps {
   title: string; // Title of the video
   description: string; // Description of the video
-  videoUrl: string; // URL to the video
+  // videoUrl: string; // URL to the video
   thumbnail?: string; // Optional thumbnail URL
   createdAt: string; // Date when the video was created
   videoId: string; // Unique identifier for the video
@@ -21,7 +21,7 @@ interface VideoPlayerProps {
 export default function VideoPlayer({
   title,
   description,
-  videoUrl,
+  // videoUrl,
   thumbnail,
   createdAt,
   videoId,
