@@ -46,7 +46,7 @@ export default function LandingContent() {
         </p>
         <p className="text-xl text-white mt-4 font-montserrat">
           If your org could use FREE social media assets like the one above, or you want to be a part of the What&apos;s Good Movement, <br /> 
-          <br/><strong>click the button below to get learn what that looks like and to get started </strong><br/><br />
+          <br/><strong>click the button below to learn what that looks like or to get started </strong><br/><br />
           Let&apos;s <br />
           <br/><strong className="text-red-800">amplify your voice</strong><br/><br /> 
           and <br />
