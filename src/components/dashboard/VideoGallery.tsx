@@ -1,21 +1,20 @@
-// components/VideoGallery.tsx
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { DriveClient, DriveFile, DriveError } from '@/lib/DriveClient';
 import VideoPlayer from './VideoPlayer';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 interface VideoGalleryProps {
   folderId: string;
 }
 
-const VideoGallery = ({ folderId }: VideoGalleryProps) => {
+export default function VideoGallery({ folderId }: VideoGalleryProps) {
   const [videos, setVideos] = useState<DriveFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const { token, loading: authLoading, error: authError } = useGoogleAuth();
+  const { token, loading: authLoading } = useGoogleAuth();
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -27,8 +26,6 @@ const VideoGallery = ({ folderId }: VideoGalleryProps) => {
         
         const driveClient = new DriveClient(token);
         const files = await driveClient.listFiles(folderId);
-        
-        // Filter for video files only
         const videoFiles = files.filter(file => 
           file.mimeType.startsWith('video/') || 
           file.mimeType === 'application/vnd.google-apps.video'
@@ -36,12 +33,7 @@ const VideoGallery = ({ folderId }: VideoGalleryProps) => {
         
         setVideos(videoFiles);
       } catch (err) {
-        console.error('Error fetching videos:', err);
-        if (err instanceof DriveError) {
-          setError(err.message);
-        } else {
-          setError('Failed to load videos. Please try again later.');
-        }
+        setError(err instanceof DriveError ? err.message : 'Failed to load videos.');
       } finally {
         setIsLoading(false);
       }
@@ -50,83 +42,62 @@ const VideoGallery = ({ folderId }: VideoGalleryProps) => {
     fetchVideos();
   }, [token, authLoading, folderId]);
 
-  const handleDelete = async (videoId: string) => {
-    if (!token) return;
-
-    try {
-      const driveClient = new DriveClient(token);
-      await driveClient.deleteFile(videoId);
-      setVideos(prevVideos => prevVideos.filter(video => video.id !== videoId));
-    } catch (err) {
-      console.error('Error deleting video:', err);
-      if (err instanceof DriveError) {
-        setError(err.message);
-      } else {
-        setError('Failed to delete video. Please try again later.');
-      }
-    }
-  };
-
-  if (authLoading) {
+  if (authLoading || isLoading) {
     return (
-      <div className="w-full h-full flex justify-center items-center p-8">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (authError) {
-    return (
-      <div className="w-full h-full flex justify-center items-center p-8">
-        <p className="text-red-500">Authentication error. Please try signing in again.</p>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="w-full h-full flex justify-center items-center p-8">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-[400px] flex flex-col items-center justify-center text-content-secondary">
+        <Loader2 className="w-8 h-8 animate-spin mb-4 text-hero" />
+        <p className="text-sm">Loading your content...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full h-full flex justify-center items-center p-8">
-        <div className="text-center">
-          <p className="text-lg text-red-600">{error}</p>
+      <div className="min-h-[400px] flex flex-col items-center justify-center">
+        <div className="card-raised bg-red-50 border-l-4 border-red-500 p-6 max-w-md w-full">
+          <div className="flex items-start gap-4">
+            <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="font-semibold text-red-700 mb-1">Error Loading Videos</h3>
+              <p className="text-red-600">{error}</p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!videos.length) {
+  if (videos.length === 0) {
     return (
-      <div className="w-full h-full flex justify-center items-center p-8">
-        <p className="text-lg text-gray-600">No videos found in this folder</p>
+      <div className="min-h-[400px] flex flex-col items-center justify-center">
+        <div className="card bg-surface-secondary/50 border-2 border-dashed border-gray-200 text-center max-w-md w-full">
+          <div className="space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-surface-tertiary flex items-center justify-center">
+              <svg className="w-8 h-8 text-content-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p className="text-content-secondary font-medium">
+              No videos yet. Upload your first video to get started!
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {videos.map((video) => (
-          <div key={video.id} className="w-full">
-            <VideoPlayer
-              title={video.name}
-              description={video.description || ''}
-              thumbnailUrl={video.thumbnailLink}
-              createdAt={video.createdTime}
-              videoId={video.id}
-              onDelete={handleDelete}
-            />
-          </div>
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {videos.map((video) => (
+        <VideoPlayer
+          key={video.id}
+          title={video.name}
+          description={video.description || ''}
+          thumbnailUrl={video.thumbnailLink}
+          createdAt={video.createdTime}
+          videoId={video.id}
+        />
+      ))}
     </div>
   );
-};
-
-export default VideoGallery;
+}
