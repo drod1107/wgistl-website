@@ -1,70 +1,80 @@
-// Tailwind CSS Configuration (tailwind.config.js)
-// Tailwind configuration file for customizing styles
+// tailwind.config.js
 module.exports = {
-    darkMode: ['class'],
-	content: [
-		'./app/**/*.{js,ts,jsx,tsx}', // Scans everything in the 'app' folder
-		'./components/**/*.{js,ts,jsx,tsx}', // Scans components folder
-		'./src/**/*.{js,ts,jsx,tsx}', // Make sure to scan everything in the 'src' folder if you have components there
-		'./node_modules/@shadcn/ui/**/*.js' // Include ShadCN components
-	  ],
+  darkMode: ['class'],
+  content: [
+    './app/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@shadcn/ui/**/*.js',
+  ],
   theme: {
-  	extend: {
-  		colors: {
-  			hero: '#C41E3A',
-  			blue: '#002F87',
-  			gold: '#FDB927',
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
-  			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))'
-  			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
-  			},
-  			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
-  			},
-  			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
-  			},
-  			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
-  			},
-  			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
-  			},
-  			destructive: {
-  				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))'
-  			},
-  			border: 'hsl(var(--border))',
-  			input: 'hsl(var(--input))',
-  			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			}
-  		},
-  		fontFamily: {
-  			oswald: ['Oswald', 'sans-serif'],
-  			montserrat: ['Montserrat', 'sans-serif']
-  		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		}
-  	}
+    extend: {
+      colors: {
+        // Keeping your existing brand colors
+        hero: '#C41E3A',
+        blue: '#002F87',
+        gold: '#FDB927',
+        // Adding semantic colors for better context
+        'content-primary': '#1A1A1A',
+        'content-secondary': '#4A4A4A',
+        'surface': {
+          primary: '#FFFFFF',
+          secondary: '#F8F9FA',
+          tertiary: '#F1F3F5'
+        },
+        // Adding overlay colors for modals and dropdowns
+        overlay: 'rgba(0, 0, 0, 0.4)',
+        // Extending your brand colors with variations
+        'hero-light': '#E85D74',
+        'hero-dark': '#9C1830',
+        'blue-light': '#1A4CAD',
+        'blue-dark': '#002266',
+        'gold-light': '#FECD58',
+        'gold-dark': '#D99B0D',
+        // System feedback colors
+        success: '#10B981',
+        warning: '#F59E0B',
+        error: '#EF4444',
+        info: '#3B82F6'
+      },
+      fontFamily: {
+        oswald: ['var(--font-oswald)'],
+        montserrat: ['var(--font-montserrat)'],
+      },
+      spacing: {
+        // Adding some common layout spacings
+        layout: '2.5rem',
+        'layout-sm': '1.5rem',
+        'layout-lg': '4rem',
+      },
+      borderRadius: {
+        DEFAULT: '0.5rem',
+        'lg': 'var(--radius)',
+        'md': 'calc(var(--radius) - 2px)',
+        'sm': 'calc(var(--radius) - 4px)',
+      },
+      boxShadow: {
+        // Enhanced shadow system
+        'soft': '0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
+        'raised': '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
+        'prominent': '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+      },
+      // Adding z-index system
+      zIndex: {
+        'dropdown': 100,
+        'sticky': 200,
+        'modal': 300,
+        'popover': 400,
+        'toast': 500,
+      },
+      // Adding container constraints
+      maxWidth: {
+        'content': '1240px',
+        'content-sm': '640px',
+        'content-md': '768px',
+        'content-lg': '1024px',
+      },
+    },
   },
-  plugins: [require("tailwindcss-animate")], // No additional Tailwind plugins used in this project
+  plugins: [require('tailwindcss-animate')],
 };

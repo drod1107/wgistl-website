@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
@@ -21,14 +21,13 @@ const Progress = React.forwardRef<
   const clampedValue = Math.max(0, Math.min(100, value))
   
   // Determine background color based on error state
-  const baseClasses = "relative h-4 w-full overflow-hidden rounded-full"
-  const bgClasses = hasError ? "bg-red-200" : "bg-secondary"
-  const indicatorClasses = `h-full w-full flex-1 transition-all ${hasError ? "bg-red-500" : "bg-primary"}`
+  const bgClasses = hasError ? "bg-red-200" : "bg-surface-secondary"
+  const indicatorClasses = `h-full w-full flex-1 transition-all ${hasError ? "bg-red-500" : "bg-hero"}`
 
   return (
     <ProgressPrimitive.Root
       ref={ref}
-      className={`${baseClasses} ${bgClasses} ${className}`.trim()}
+      className={`relative h-4 w-full overflow-hidden rounded-full ${bgClasses} ${className}`.trim()}
       {...props}
       aria-label={indicator || `Progress: ${clampedValue}%`}
       aria-valuemin={0}
