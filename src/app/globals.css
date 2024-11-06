@@ -1,69 +1,135 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
     --radius: 0.5rem;
+    --header-height: 4rem;
+    --content-padding: clamp(1rem, 5vw, 2.5rem);
   }
- 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-  }
-}
 
-@layer base {
-  * {
-    @apply border-border;
+  /* Base HTML element styling */
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-montserrat), sans-serif;
+    @apply bg-surface-primary text-content-primary antialiased;
   }
+
+  /* Typography baseline */
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-oswald), sans-serif;
+    @apply font-oswald text-content-primary tracking-tight;
+  }
+
+  p {
+    @apply font-montserrat text-content-secondary leading-relaxed;
   }
 }
 
-@media (max-width: 768px) {
-  .header-title {
-    display: none;
+@layer components {
+  /* Layout utilities */
+  .content-container {
+    @apply w-full max-w-content mx-auto px-[var(--content-padding)];
   }
+
+  .content-container-sm {
+    @apply w-full max-w-content-sm mx-auto px-[var(--content-padding)];
+  }
+
+  /* Section spacing */
+  .section {
+    @apply py-layout;
+  }
+
+  .section-sm {
+    @apply py-layout-sm;
+  }
+
+  .section-lg {
+    @apply py-layout-lg;
+  }
+
+  /* Card variations */
+  .card {
+    @apply bg-surface-primary rounded-lg shadow-soft p-6;
+  }
+
+  .card-raised {
+    @apply bg-surface-primary rounded-lg shadow-raised p-6;
+  }
+
+  /* Responsive video container */
+  .video-container {
+    @apply relative w-full overflow-hidden;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  }
+
+  .video-container > * {
+    @apply absolute top-0 left-0 w-full h-full;
+  }
+
+  /* Glass effect for overlays */
+  .glass {
+    @apply backdrop-blur-md bg-white/80;
+  }
+
+  .glass-dark {
+    @apply backdrop-blur-md bg-black/80;
+  }
+}
+
+@layer utilities {
+  /* Text selection styling */
+  ::selection {
+    @apply bg-hero/20 text-content-primary;
+  }
+
+  /* Scrollbar styling */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.300') transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full hover:bg-gray-400 transition-colors;
+  }
+
+  /* Text balance for better typography */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gradient text utility */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-hero to-blue;
+  }
+}
+
+/* Fade animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Ensure iframes in video containers maintain aspect ratio */
+.video-container iframe {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 100%;
 }

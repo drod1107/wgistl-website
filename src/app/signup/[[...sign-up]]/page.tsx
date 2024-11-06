@@ -253,7 +253,7 @@ export default function Page() {
   return (
     <>
       <Header />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto my-12 px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Sign up</h1>
         <h2 className="text-lg font-semibold mb-4">Here&apos;s the problem:</h2>
         <p className="mb-4">Big orgs suck the air out of the room. Some are great. Some are not.</p>

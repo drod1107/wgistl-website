@@ -1,243 +1,247 @@
-// components/VideoUpload.tsx
-'use client'
+'use client';
 
 import { useRef, useState } from 'react';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { DriveClient, DriveError } from '@/lib/DriveClient';
 import { Progress } from '@/components/ui/progress';
+import { Upload, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface VideoUploadProps {
   folderId: string;
 }
 
-interface UploadState {
-  file: File | null;
-  uploading: boolean;
-  progress: number;
-  error: string | null;
-  title: string;
-  description: string;
-}
-
-const VideoUpload = ({ folderId }: VideoUploadProps) => {
-  const [state, setState] = useState<UploadState>({
-    file: null,
+export default function VideoUpload({ folderId }: VideoUploadProps) {
+  const [state, setState] = useState({
+    file: null as File | null,
     uploading: false,
     progress: 0,
-    error: null,
+    error: null as string | null,
     title: '',
     description: '',
+    success: false
   });
 
-  const { token, loading: authLoading, error: authError } = useGoogleAuth();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const progressIntervalRef = useRef<ReturnType<typeof setInterval>>();
+  const { token } = useGoogleAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    setState(prev => ({ ...prev, file, error: null }));
-  };
-
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.target;
-    setState(prev => ({ ...prev, [name]: value, error: null }));
-  };
-
-  const clearUploadState = () => {
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-      progressIntervalRef.current = undefined;
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleUpload = async (e: React.FormEvent) => {
+  const handleUpload = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
-    
     if (!state.file || !token) return;
 
-    setState(prev => ({
-      ...prev,
-      uploading: true,
-      progress: 0,
-      error: null,
-    }));
-
-    // Simulated progress updates
-    progressIntervalRef.current = setInterval(() => {
-      setState(prev => ({
-        ...prev,
-        progress: Math.min((prev.progress || 0) + 10, 90)
-      }));
-    }, 500);
-
+    setState(prev => ({ ...prev, uploading: true, progress: 0, error: null }));
     try {
       const driveClient = new DriveClient(token);
-      
-      await driveClient.uploadFile(
-        state.file,
-        folderId,
-        {
-          title: state.title || state.file.name,
-          description: state.description
-        }
-      );
-
-      clearUploadState();
-
-      // Show completion state
-      setState({
-        file: null,
-        uploading: false,
-        progress: 100,
-        error: null,
-        title: '',
-        description: '',
+      await driveClient.uploadFile(state.file, folderId, {
+        title: state.title || state.file.name,
+        description: state.description,
       });
 
-      // Reload the page after a short delay to show the new video
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-
-    } catch (err) {
-      console.error('Upload error:', err);
+      // First set progress to 100%
+      setState(prev => ({ ...prev, progress: 100 }));
       
-      clearUploadState();
+      // Wait a moment to show the completed progress
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      setState(prev => ({
-        ...prev,
+      // Then show success state
+      setState(prev => ({ 
+        ...prev, 
         uploading: false,
-        progress: 0,
-        error: err instanceof DriveError 
-          ? err.message 
-          : 'Failed to upload video. Please try again.'
+        error: null, 
+        success: true,
+        file: null,
+        title: '',
+        description: ''
+      }));
+
+      // Reset success state after 3 seconds
+      setTimeout(() => {
+        setState(prev => ({ ...prev, success: false }));
+        window.location.reload();
+      }, 3000);
+
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        uploading: false, 
+        progress: 0, 
+        error: error instanceof DriveError ? error.message : 'Upload failed. Try again.' 
       }));
     }
   };
 
-  const removeFile = () => {
-    clearUploadState();
-    setState({
-      file: null,
-      uploading: false,
-      progress: 0,
-      error: null,
-      title: state.title,
-      description: state.description,
-    });
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setState(prev => ({ 
+        ...prev, 
+        file,
+        error: null,
+        success: false
+      }));
+    }
   };
 
-  if (authLoading) {
-    return (
-      <div className="w-full max-w-md mx-auto p-4">
-        <div className="text-center">Loading...</div>
-      </div>
-    );
-  }
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
-  if (authError) {
-    return (
-      <div className="w-full max-w-md mx-auto p-4">
-        <div className="text-red-500 text-center">
-          Authentication error. Please try signing in again.
-        </div>
-      </div>
-    );
-  }
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('video/')) {
+      setState(prev => ({ 
+        ...prev, 
+        file,
+        error: null,
+        success: false
+      }));
+    }
+  };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleUpload}>
-        <div
-          className={`border-2 border-dashed p-4 ${
-            state.file ? 'border-blue-500' : 'border-gray-300'
-          }`}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-title-2 font-display font-bold text-gray-900">
+          Upload New Video
+        </h2>
+      </div>
+
+      <form onSubmit={handleUpload} className="space-y-6">
+        {/* File Drop Zone */}
+        <div 
+          className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors
+            ${state.file ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-gray-400'}
+            ${state.uploading ? 'pointer-events-none opacity-50' : ''}`}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
         >
-          {state.file ? (
-            <div className="flex items-center justify-between">
-              <span className="text-green-600">{state.file.name}</span>
-              <button
-                type="button"
-                onClick={removeFile}
-                className="text-red-500 hover:text-red-700"
-              >
-                Remove
-              </button>
-            </div>
-          ) : (
-            <>
-              <p className="mt-2 text-gray-600">Drag and drop your video here</p>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileInput}
-                accept="video/*"
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-            </>
-          )}
-        </div>
-
-        <div className="mt-4">
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-            Title
-          </label>
           <input
-            id="title"
-            name="title"
-            type="text"
-            value={state.title}
-            onChange={handleInputChange}
-            className="block w-full mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            placeholder="Enter video title"
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept="video/*"
+            className="hidden"
           />
+
+          <div className="space-y-4">
+            {state.file ? (
+              <>
+                <div className="w-16 h-16 mx-auto rounded-full bg-primary-100 flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-primary-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-medium text-primary-700">{state.file.name}</p>
+                  <p className="text-sm text-primary-600">Click to change file</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
+                  <Upload className="w-8 h-8 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-medium text-gray-700">
+                    Drop your video here or click to browse
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Supports MP4, MOV, and other common video formats
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
-        <div className="mt-4">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={state.description}
-            onChange={handleInputChange}
-            rows={3}
-            className="block w-full mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            placeholder="Enter video description"
-          />
-        </div>
+        {/* File Details */}
+        {state.file && (
+          <div className="space-y-4 animate-fade-in">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                Title
+              </label>
+              <input
+                type="text"
+                id="title"
+                value={state.title}
+                onChange={(e) => setState(prev => ({ ...prev, title: e.target.value }))}
+                className="input w-full"
+                placeholder="Enter video title"
+              />
+            </div>
 
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                id="description"
+                value={state.description}
+                onChange={(e) => setState(prev => ({ ...prev, description: e.target.value }))}
+                rows={4}
+                className="input w-full"
+                placeholder="Enter video description"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Upload Progress */}
         {state.uploading && (
-          <div className="w-full space-y-2 mt-4">
-            <Progress value={state.progress} className="w-full" />
-            <p className="text-sm text-gray-500 text-center">
-              {state.progress.toFixed(0)}% uploaded
+          <div className="space-y-2 animate-fade-in">
+            <Progress value={state.progress} />
+            <p className="text-sm text-center text-gray-600">
+              Uploading... {state.progress.toFixed(0)}%
             </p>
           </div>
         )}
 
-        {state.error && (
-          <div className="mt-4 p-3 bg-red-50 text-sm text-red-500 rounded-md">
-            {state.error}
+        {/* Success Message */}
+        {state.success && (
+          <div className="rounded-lg bg-green-50 p-4 animate-fade-in">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <CheckCircle className="h-5 w-5 text-green-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-green-800">
+                  Upload successful! Refreshing gallery...
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={state.uploading || !state.file}
-          className="w-full p-2 bg-black b-2 bg-blue-500 text-white rounded disabled:bg-gray-300 mt-4"
-        >
-          {state.uploading ? 'Uploading...' : 'Upload Video'}
-        </button>
+        {/* Error Message */}
+        {state.error && (
+          <div className="rounded-lg bg-red-50 p-4 animate-fade-in">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-5 w-5 text-red-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-red-800">
+                  {state.error}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Upload Button */}
+        {state.file && (
+          <button
+            type="submit"
+            disabled={state.uploading || !state.file}
+            className="btn-primary w-full"
+          >
+            {state.uploading ? 'Uploading...' : 'Upload Video'}
+          </button>
+        )}
       </form>
     </div>
   );
-};
-
-export default VideoUpload;
+}
