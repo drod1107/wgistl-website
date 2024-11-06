@@ -1,30 +1,25 @@
+// components/VideoUpload.tsx
 'use client'
 
 import { useRef, useState } from 'react';
+import { useGoogleAuth } from '@/hooks/useGoogleAuth';
+import { DriveClient, DriveError } from '@/lib/DriveClient';
 import { Progress } from '@/components/ui/progress';
-import { DriveErrorType, DriveErrorDetails, DriveAPIResponse } from '@/types/drive';
-
-interface UploadState {
-  file: File | null;
-  uploading: boolean;
-  progress: number;
-  error: UploadError | null;
-  title: string;
-  description: string;
-  folderId: string;
-}
-
-interface UploadError {
-  type: DriveErrorType;
-  message: string;
-  details?: DriveErrorDetails;
-}
 
 interface VideoUploadProps {
   folderId: string;
 }
 
-export default function VideoUpload({ folderId }: VideoUploadProps) {
+interface UploadState {
+  file: File | null;
+  uploading: boolean;
+  progress: number;
+  error: string | null;
+  title: string;
+  description: string;
+}
+
+const VideoUpload = ({ folderId }: VideoUploadProps) => {
   const [state, setState] = useState<UploadState>({
     file: null,
     uploading: false,
@@ -32,20 +27,22 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
     error: null,
     title: '',
     description: '',
-    folderId,
   });
-  
+
+  const { token, loading: authLoading, error: authError } = useGoogleAuth();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval>>();
 
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
-    setState(prevState => ({ ...prevState, file, error: null }));
+    setState(prev => ({ ...prev, file, error: null }));
   };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = event.target;
-    setState(prevState => ({ ...prevState, [name]: value, error: null }));
+    setState(prev => ({ ...prev, [name]: value, error: null }));
   };
 
   const clearUploadState = () => {
@@ -58,11 +55,13 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
     }
   };
 
-  const uploadVideo = async () => {
-    if (!state.file) return;
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!state.file || !token) return;
 
-    setState(prevState => ({
-      ...prevState,
+    setState(prev => ({
+      ...prev,
       uploading: true,
       progress: 0,
       error: null,
@@ -70,46 +69,35 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
 
     // Simulated progress updates
     progressIntervalRef.current = setInterval(() => {
-      setState(prevState => ({
-        ...prevState,
-        progress: Math.min((prevState.progress || 0) + 10, 90)
+      setState(prev => ({
+        ...prev,
+        progress: Math.min((prev.progress || 0) + 10, 90)
       }));
     }, 500);
 
     try {
-      const formData = new FormData();
-      formData.append('file', state.file);
-      formData.append('title', state.title || state.file.name);
-      formData.append('description', state.description);
-      formData.append('folderId', state.folderId);
-
-      const response = await fetch('/api/uploadVideo', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json() as DriveAPIResponse;
-
-      if (!response.ok) {
-        throw {
-          type: data.type || DriveErrorType.UPLOAD_ERROR,
-          message: data.error || data.message || 'Upload failed',
-          details: data.details
-        };
-      }
+      const driveClient = new DriveClient(token);
+      
+      await driveClient.uploadFile(
+        state.file,
+        folderId,
+        {
+          title: state.title || state.file.name,
+          description: state.description
+        }
+      );
 
       clearUploadState();
 
       // Show completion state
-      setState(prevState => ({
-        ...prevState,
-        progress: 100,
-        uploading: false,
+      setState({
         file: null,
+        uploading: false,
+        progress: 100,
+        error: null,
         title: '',
         description: '',
-        error: null
-      }));
+      });
 
       // Reload the page after a short delay to show the new video
       setTimeout(() => {
@@ -118,17 +106,16 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
 
     } catch (err) {
       console.error('Upload error:', err);
+      
       clearUploadState();
       
-      setState(prevState => ({
-        ...prevState,
+      setState(prev => ({
+        ...prev,
         uploading: false,
         progress: 0,
-        error: {
-          type: (err as UploadError)?.type || DriveErrorType.UPLOAD_ERROR,
-          message: (err as UploadError)?.message || 'Failed to upload video',
-          details: (err as UploadError)?.details
-        }
+        error: err instanceof DriveError 
+          ? err.message 
+          : 'Failed to upload video. Please try again.'
       }));
     }
   };
@@ -142,44 +129,30 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
       error: null,
       title: state.title,
       description: state.description,
-      folderId: state.folderId,
     });
   };
 
-  const renderError = () => {
-    if (!state.error) return null;
-
-    let errorMessage = state.error.message;
-    switch (state.error.type) {
-      case DriveErrorType.UNAUTHORIZED:
-        errorMessage = 'Access denied. Please check your permissions.';
-        break;
-      case DriveErrorType.NETWORK_ERROR:
-        errorMessage = 'There has been a network error, or no videos have been uploaded yet.';
-        break;
-      // UPLOAD_ERROR uses the default message from the server
-    }
-
+  if (authLoading) {
     return (
-      <div className="text-red-500 text-sm mt-4 p-3 bg-red-50 rounded-md">
-        {errorMessage}
-        {state.error.details?.message && (
-          <div className="text-xs mt-1 text-red-400">
-            {state.error.details.message}
-          </div>
-        )}
+      <div className="w-full max-w-md mx-auto p-4">
+        <div className="text-center">Loading...</div>
       </div>
     );
-  };
+  }
+
+  if (authError) {
+    return (
+      <div className="w-full max-w-md mx-auto p-4">
+        <div className="text-red-500 text-center">
+          Authentication error. Please try signing in again.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          uploadVideo();
-        }}
-      >
+      <form onSubmit={handleUpload}>
         <div
           className={`border-2 border-dashed p-4 ${
             state.file ? 'border-blue-500' : 'border-gray-300'
@@ -249,7 +222,11 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
           </div>
         )}
 
-        {renderError()}
+        {state.error && (
+          <div className="mt-4 p-3 bg-red-50 text-sm text-red-500 rounded-md">
+            {state.error}
+          </div>
+        )}
 
         <button
           type="submit"
@@ -261,4 +238,6 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
       </form>
     </div>
   );
-}
+};
+
+export default VideoUpload;

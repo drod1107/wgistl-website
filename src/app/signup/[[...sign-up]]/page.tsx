@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useSignUp } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
+import Header from '@/components/layout/Header'
 import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
 import { DriveErrorType } from '@/types/drive'
 import Link from 'next/link'
