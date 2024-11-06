@@ -3,12 +3,13 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useGoogleAuth } from '@/hooks/useGoogleAuth';
+import { DriveClient } from '@/lib/DriveClient';
 
 interface VideoPlayerProps {
   title: string;
   description: string;
-  videoUrl: string;
-  thumbnail?: string;
+  thumbnailUrl?: string;
   createdAt: string;
   videoId: string;
   onDelete: (videoId: string) => void;
@@ -17,8 +18,7 @@ interface VideoPlayerProps {
 export default function VideoPlayer({
   title,
   description,
-  videoUrl,
-  thumbnail,
+  thumbnailUrl,
   createdAt,
   videoId,
   onDelete
@@ -26,25 +26,19 @@ export default function VideoPlayer({
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { token } = useGoogleAuth();
 
   const handleDelete = async () => {
+    if (!token) return;
+    
     setIsDeleting(true);
     try {
-      const response = await fetch('/api/deleteVideo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ videoId }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete video');
-      }
-
-      onDelete(videoId); // Notify parent component to remove this video from the list
+      const driveClient = new DriveClient(token);
+      await driveClient.deleteFile(videoId);
+      onDelete(videoId);
     } catch (error) {
       console.error('Error deleting video:', error);
+      // You might want to show an error message to the user here
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);
@@ -61,17 +55,19 @@ export default function VideoPlayer({
 
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden">
-      <div className="relative aspect-video">
-        {!isIframeLoaded && thumbnail && (
+      <div className="relative aspect-video bg-black">
+        {/* Conditional thumbnail display */}
+        {!isIframeLoaded && thumbnailUrl && (
           <Image
-            src={thumbnail}
+            src={thumbnailUrl}
             alt={`Thumbnail for ${title}`}
-            className="absolute top-0 left-0 w-full h-full object-cover"
+            className="absolute top-0 left-0 w-full h-full object-contain"
             width={640}
             height={360}
           />
         )}
-        
+
+        {/* Play button overlay */}
         {!isIframeLoaded && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-16 h-16 bg-black bg-opacity-70 rounded-full flex items-center justify-center">
@@ -80,32 +76,31 @@ export default function VideoPlayer({
           </div>
         )}
 
+        {/* Video iframe */}
         <iframe
-          className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${
-            isIframeLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          src={videoUrl}
+          className={`absolute center w-full h-full transition-all object-contain`}
+          src={`https://drive.google.com/file/d/${videoId}/preview?embedded=true`}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
           onLoad={() => setIsIframeLoaded(true)}
         />
       </div>
-      
+
+      {/* Video details and actions */}
       <div className="p-4 flex flex-col gap-2">
         <h3 className="text-lg font-semibold line-clamp-2" title={title}>
           {title}
         </h3>
-        
+
         <div className="text-sm text-gray-600">
           <p>{formatDate(createdAt)}</p>
         </div>
-        
+
         {description && description !== "undefined" && (
           <p className="text-gray-700 line-clamp-3" title={description}>
             {description}
           </p>
         )}
-        
+
         {/* Delete Button */}
         <button
           className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"

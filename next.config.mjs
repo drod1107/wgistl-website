@@ -23,6 +23,20 @@ const nextConfig = {
       },
     ],
   },
-};
-
-export default nextConfig;
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://drive.google.com https://*.googleusercontent.com https://accounts.google.com;"
+          }
+        ],
+      }
+    ];
+  }
+  
+ };
+ 
+ export default nextConfig;

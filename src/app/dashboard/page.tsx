@@ -1,11 +1,11 @@
-// components/main/page.tsx
+// components/dashboard/MainDashboard.tsx
 'use client'
 
 import { SignInButton, SignUpButton, useAuth, useUser } from "@clerk/nextjs";
-import VideoGallery from "../VideoGallery";
-import VideoUpload from "../VideoUpload";
+import VideoGallery from "@/components/dashboard/VideoGallery";
+import VideoUpload from "@/components/dashboard/VideoUpload";
 
-export default function Main() {
+export default function MainDashboard() {
   const { isLoaded, userId } = useAuth();
   const { user } = useUser();
 
@@ -44,7 +44,6 @@ export default function Main() {
   // Get the organization name and folder IDs from user metadata
   const orgName = user?.unsafeMetadata?.org_name as string;
   const unlistedId = user?.unsafeMetadata?.unlistedId as string;  // This is for raw content
-  // const publicId = user?.unsafeMetadata?.publicId as string;      // This is for finished content
 
   // Show error if no folder ID is found
   if (!unlistedId) {
@@ -74,17 +73,22 @@ export default function Main() {
     );
   }
 
-  // Show the main content with VideoGallery and VideoUpload
   return (
     <div className="flex flex-col min-h-screen p-4">
       <h1 className="text-3xl font-bold text-gray-800 font-oswald mb-8 text-center">
         {orgName}&apos;s Content Dashboard
       </h1>
       <h2 className="text-2xl font-bold text-gray-800 font-oswald mb-4 text-center">
-        Note: During our beta launch phase,</h2><p className="text-xl text-gray-600 mb-4"> ...there may be delays in the appearance of preview thumbnails.<br/><br/> You may be required to click through in order to view the content. <br/><br/>Also be aware that uploads will continue to process for some time after upload before they can be viewed. <br/><br/>Thank you for your patience as we grow and evolve! </p>
+        Note: During our beta launch phase,</h2>
+      <p className="text-xl text-gray-600 mb-4"> 
+        ...there may be delays in the appearance of preview thumbnails.<br/><br/> 
+        You may be required to click through in order to view the content. <br/><br/>
+        Also be aware that uploads will continue to process for some time after upload before they can be viewed. <br/><br/>
+        Thank you for your patience as we grow and evolve! 
+      </p>
       <VideoUpload folderId={unlistedId}/>
       <div className="flex-grow">
-        <VideoGallery folderId={unlistedId} />  {/* Showing raw content playlist */}
+        <VideoGallery folderId={unlistedId} />
       </div>
     </div>
   );

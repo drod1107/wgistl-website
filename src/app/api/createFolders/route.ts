@@ -1,5 +1,6 @@
+// app/api/createFolders/route.ts
 import { NextResponse } from "next/server";
-import { ServerDriveUtil } from "@/lib/driveUtil";
+import { ServerDriveUtil } from "@/lib/driveUtils";
 import { createLogger } from "@/lib/logger";
 import { DriveErrorType, DriveError } from "@/types/drive";
 
