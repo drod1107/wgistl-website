@@ -1,16 +1,8 @@
-// lib/driveUtil.ts
+import { CreateFoldersOptions, FolderCreationResponse, DriveErrorType, DriveError, DriveFile } from "@/types/drive";
 import { getGoogleAuthClient } from "./googleAuth";
 import { createLogger } from "./logger";
-import {
-  DriveFile,
-  CreateFoldersOptions,
-  FolderCreationResponse,
-  DriveErrorType,
-  DriveError,
-} from "@/types/drive";
 
 const logger = createLogger("ServerDriveUtil");
-
 const DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
 
 export class ServerDriveUtil {
@@ -47,9 +39,7 @@ export class ServerDriveUtil {
         orgName,
       });
 
-      if (error instanceof DriveError) {
-        throw error;
-      }
+      if (error instanceof DriveError) throw error;
 
       throw new DriveError(
         DriveErrorType.FOLDER_ERROR,
@@ -86,32 +76,23 @@ export class ServerDriveUtil {
       });
 
       if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          throw new DriveError(
-            DriveErrorType.UNAUTHORIZED,
-            "Unauthorized to create folder",
-            {
-              status: response.status,
-              message: await response.text(),
-            }
-          );
-        }
         throw new DriveError(
-          DriveErrorType.FOLDER_ERROR,
+          response.status === 401 || response.status === 403
+            ? DriveErrorType.UNAUTHORIZED
+            : DriveErrorType.FOLDER_ERROR,
           `Failed to create folder: ${response.status}`,
           {
             status: response.status,
             message: await response.text(),
             folderName: name,
+            userEmail,
           }
         );
       }
 
       return response.json();
     } catch (error) {
-      if (error instanceof DriveError) {
-        throw error;
-      }
+      if (error instanceof DriveError) throw error;
 
       throw new DriveError(
         DriveErrorType.FOLDER_ERROR,
@@ -175,7 +156,7 @@ export class ServerDriveUtil {
         await new Promise((resolve) => setTimeout(resolve, 1000)); // wait for 1 second
         return this.shareFolderWithAccount(folderId, userEmail, retries - 1);
       }
-      throw error; // rethrow if out of retries or non-retriable error
+      throw error;
     }
   }
 }

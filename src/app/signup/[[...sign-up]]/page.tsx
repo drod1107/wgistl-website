@@ -102,7 +102,8 @@ export default function Page() {
           unlistedId,
           publicId,
           orgId: unlistedId,
-          userId: publicId
+          userId: publicId,
+          superuser: false
         }
       });
 

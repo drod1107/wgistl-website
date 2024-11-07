@@ -1,6 +1,6 @@
 'use client';
 
-import { SignUpButton } from '@clerk/nextjs';
+import Link from "next/link";
 
 export default function LandingContent() {
   return (
@@ -105,11 +105,11 @@ export default function LandingContent() {
                 ...Without spending a penny.
               </p>
 
-              <SignUpButton>
-                <button className="bg-hero hover:bg-hero-dark text-white font-bold py-3 px-8 rounded-lg transform hover:scale-105 transition-all shadow-raised">
+              <Link href="/signup">
+                <button className="bg-white text-black font-bold py-2 px-4 rounded my-5">
                   Sign Up
                 </button>
-              </SignUpButton>
+              </Link>
             </div>
           </div>
         </div>

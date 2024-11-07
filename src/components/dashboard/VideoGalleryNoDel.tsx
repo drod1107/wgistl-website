@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { DriveClient, DriveFile, DriveError } from '@/lib/DriveClient';
-import VideoPlayer from './VideoPlayerWithDel';
+import VideoPlayer from './VideoPlayerNoDel';
 import { Loader2, AlertCircle } from 'lucide-react';
 
-interface VideoGalleryProps {
+interface VideoGalleryNoDelProps {
   folderId: string;
 }
 
-export default function VideoGallery({ folderId }: VideoGalleryProps) {
+export default function VideoGalleryNoDel({ folderId }: VideoGalleryNoDelProps) {
   const [videos, setVideos] = useState<DriveFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export default function VideoGallery({ folderId }: VideoGalleryProps) {
               </svg>
             </div>
             <p className="text-content-secondary font-medium">
-              No videos yet. Upload your first video to get started!
+              No videos yet.<br/> If you&apos;ve uploaded content, please be patient - we will have finished assets for you soon!
             </p>
           </div>
         </div>
