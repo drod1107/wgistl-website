@@ -4,23 +4,32 @@ import { useRef, useState } from 'react';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { DriveClient, DriveError } from '@/lib/DriveClient';
 import { Progress } from '@/components/ui/progress';
-import { Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Upload } from 'lucide-react';
 
 interface VideoUploadProps {
   folderId: string;
 }
 
+interface FormState {
+  file: File | null;
+  uploading: boolean;
+  progress: number;
+  error: string | null;
+  success: boolean;
+  title: string;
+  description: string;
+}
+
 export default function VideoUpload({ folderId }: VideoUploadProps) {
-  const [state, setState] = useState({
-    file: null as File | null,
+  const [state, setState] = useState<FormState>({
+    file: null,
     uploading: false,
     progress: 0,
-    error: null as string | null,
+    error: null,
+    success: false,
     title: '',
-    description: '',
-    success: false
+    description: ''
   });
-
   const { token } = useGoogleAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,25 +37,38 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
     e.preventDefault();
     if (!state.file || !token) return;
 
-    setState(prev => ({ ...prev, uploading: true, progress: 0, error: null }));
+    setState(prev => ({
+      ...prev,
+      uploading: true,
+      progress: 0,
+      error: null
+    }));
+
     try {
       const driveClient = new DriveClient(token);
-      await driveClient.uploadFile(state.file, folderId, {
-        title: state.title || state.file.name,
-        description: state.description,
-      });
+      await driveClient.uploadFile(
+        state.file,
+        folderId,
+        {
+          title: state.title || state.file.name,
+          description: state.description,
+        },
+        (progress) => {
+          setState(prev => ({ ...prev, progress }));
+        }
+      );
 
-      // First set progress to 100%
+      // Keep progress at 100 briefly before showing success
       setState(prev => ({ ...prev, progress: 100 }));
-      
-      // Wait a moment to show the completed progress
+
+      // Short delay to show 100% before success state
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Then show success state
-      setState(prev => ({ 
-        ...prev, 
+
+      // Show success state
+      setState(prev => ({
+        ...prev,
         uploading: false,
-        error: null, 
+        error: null,
         success: true,
         file: null,
         title: '',
@@ -60,23 +82,11 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
       }, 3000);
 
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        uploading: false, 
-        progress: 0, 
-        error: error instanceof DriveError ? error.message : 'Upload failed. Try again.' 
-      }));
-    }
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setState(prev => ({ 
-        ...prev, 
-        file,
-        error: null,
-        success: false
+      setState(prev => ({
+        ...prev,
+        uploading: false,
+        progress: 0,
+        error: error instanceof DriveError ? error.message : 'Upload failed. Try again.'
       }));
     }
   };
@@ -89,11 +99,11 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith('video/')) {
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         file,
         error: null,
         success: false
@@ -111,7 +121,7 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
 
       <form onSubmit={handleUpload} className="space-y-6">
         {/* File Drop Zone */}
-        <div 
+        <div
           className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors
             ${state.file ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-gray-400'}
             ${state.uploading ? 'pointer-events-none opacity-50' : ''}`}
@@ -122,7 +132,12 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
           <input
             type="file"
             ref={fileInputRef}
-            onChange={handleFileSelect}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setState(prev => ({ ...prev, file, error: null, success: false }));
+              }
+            }}
             accept="video/*"
             className="hidden"
           />
@@ -131,11 +146,15 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
             {state.file ? (
               <>
                 <div className="w-16 h-16 mx-auto rounded-full bg-primary-100 flex items-center justify-center">
-                  <CheckCircle className="w-8 h-8 text-primary-500" />
+                  <Upload className="w-8 h-8 text-primary-500" />
                 </div>
                 <div>
-                  <p className="text-lg font-medium text-primary-700">{state.file.name}</p>
-                  <p className="text-sm text-primary-600">Click to change file</p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {state.file.name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Click to change file
+                  </p>
                 </div>
               </>
             ) : (
@@ -192,8 +211,11 @@ export default function VideoUpload({ folderId }: VideoUploadProps) {
         {/* Upload Progress */}
         {state.uploading && (
           <div className="space-y-2 animate-fade-in">
-            <Progress value={state.progress} />
-            <p className="text-sm text-center text-gray-600">
+            <Progress
+              value={state.progress}
+              hasError={false}
+              indicator={`Uploading: ${state.progress.toFixed(0)}%`}
+            />            <p className="text-sm text-center text-gray-600">
               Uploading... {state.progress.toFixed(0)}%
             </p>
           </div>

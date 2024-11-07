@@ -27,7 +27,7 @@ export default function MainDashboard() {
         </h1>
         <div className="flex gap-4">
           <SignInButton mode="modal">
-            <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button className="px-6 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors">
               Sign In
             </button>
           </SignInButton>

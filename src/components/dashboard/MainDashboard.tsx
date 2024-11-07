@@ -1,9 +1,9 @@
 'use client';
 
-import { SignInButton, SignUpButton, useAuth, useUser } from "@clerk/nextjs";
+import { SignInButton, useAuth, useUser } from "@clerk/nextjs";
 import VideoGallery from "./VideoGallery";
 import VideoUpload from "./VideoUpload";
-
+import Link from "next/link";
 export default function MainDashboard() {
   const { isLoaded, userId } = useAuth();
   const { user } = useUser();
@@ -33,11 +33,11 @@ export default function MainDashboard() {
                 Sign In
               </button>
             </SignInButton>
-            <SignUpButton mode="modal">
-              <button className="px-8 py-3 rounded-lg bg-hero hover:bg-hero-dark text-white transition-colors font-semibold w-full sm:w-auto">
+            <Link href="/signup">
+              <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                 Sign Up
               </button>
-            </SignUpButton>
+            </Link>
           </div>
         </div>
       </div>
@@ -55,8 +55,8 @@ export default function MainDashboard() {
           <p className="text-lg text-content-secondary">
             It seems your playlist wasn&apos;t successfully created. Please reach out to support for assistance.
           </p>
-          <a 
-            href="mailto:admin@wgistl.com" 
+          <a
+            href="mailto:admin@wgistl.com"
             className="inline-block px-6 py-3 bg-blue hover:bg-blue-dark text-white rounded-lg transition-colors font-semibold"
           >
             Contact Support
@@ -94,7 +94,7 @@ export default function MainDashboard() {
               <div>
                 <h3 className="font-semibold text-lg mb-1">During our beta launch phase...</h3>
                 <p className="text-content-secondary">
-                  There may be delays in the appearance of preview thumbnails. You may be required to click through to view the content. 
+                  There may be delays in the appearance of preview thumbnails. You may be required to click through to view the content.
                   Also be aware that uploads will continue to process for some time after upload before they can be viewed.
                   Thank you for your patience as we grow and evolve!
                 </p>
