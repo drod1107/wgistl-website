@@ -3,6 +3,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Inter, Montserrat, Oswald } from "next/font/google";
 import { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react"
 
 // Load fonts
 const inter = Inter({ subsets: ["latin"] });
@@ -40,7 +41,10 @@ export default function RootLayout({
           }}
         >
           {children}
+
         </ClerkProvider>
+
+        <Analytics />
       </body>
     </html>
   );
